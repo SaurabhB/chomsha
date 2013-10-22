@@ -1,0 +1,11 @@
+;$Id$
+name = "Social Seek"
+description = "Show diffrent social network popularity count"
+core = 7.x
+package = "Other"
+; Information added by drupal.org packaging script on 2012-12-24
+version = "7.x-1.3"
+core = "7.x"
+project = "social_seek"
+datestamp = "1356309024"
+

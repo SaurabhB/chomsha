@@ -1,0 +1,64 @@
+.vertical {
+  background: none repeat scroll 0 0 white;
+  border-radius: 6px 6px 6px 6px;
+  display: block;
+  float: left;
+  clear:both;
+  min-width:210px;
+  padding: 4px 0;
+  overflow:hidden;
+}
+.vertical a {
+  float: left;
+  clear:both;
+  width:100%;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: left;
+  font-family: arial !important;
+  border-bottom:1px solid #ddd;
+  line-height:30px !important;
+  padding: 5px;
+}
+.vertical img {
+  float: left !important;
+  display:block;
+  margin: 0 9px 0 5px !important;
+}
+.vertical span {
+  display:block;
+  width:100%;
+  font-size:12px !important;
+  font-weight:normal;
+  line-height:6px !important;
+}
+.vertical .facebook {
+  color:#0B42A6 !important;
+}
+.vertical .twitter {
+  color:#068AC6 !important;
+}
+.vertical .youtube {
+  color:#333333 !important;
+}
+.vertical .vimeo {
+  color:#189ECB !important;
+}
+.vertical .dribbble {
+  color:#E03E64 !important;
+}
+.vertical .delicious {
+  color:#4B5BFB !important;
+}
+.vertical .linkedin {
+  color:#2B83C4 !important;  
+}
+.vertical .googleplus1 {
+  color:#D23E2B !important;
+}
+.vertical .feedburner {
+  color:#ef4216 !important;  
+}
+.vertical a:hover {
+  text-decoration:underline;
+}

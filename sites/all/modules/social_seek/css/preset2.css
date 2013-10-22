@@ -1,0 +1,57 @@
+.vertical {
+  background: none repeat scroll 0 0 white;
+  border-radius: 6px 6px 6px 6px;
+  display: block;
+  float: left;
+  padding: 8px 0;
+}
+.vertical a {
+  float: left;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  font-family: arial !important;
+  text-transform: uppercase;
+  width: 82px;
+}
+.vertical img {
+  float: none !important;
+  margin: auto !important;
+  display:block;
+}
+.vertical span {
+  float:left;
+  display:block;
+  width:100%;
+  font-size:11px !important;
+}
+.vertical .facebook {
+  color:#0B42A6 !important;
+}
+.vertical .twitter {
+  color:#068AC6 !important;
+}
+.vertical .youtube {
+  color:#FB2727 !important;
+}
+.vertical .vimeo {
+  color:#189ECB !important;
+}
+.vertical .dribbble {
+  color:#E03E64 !important;
+}
+.vertical .delicious {
+  color:#4B5BFB !important;
+}
+.vertical .linkedin {
+  color:#2B83C4 !important;  
+}
+.vertical .googleplus1 {
+  color:#423e3f !important;
+}
+.vertical .feedburner {
+  color:#ef4216 !important;  
+}
+.vertical a:hover {
+  text-decoration:underline;
+}

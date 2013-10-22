@@ -1,0 +1,41 @@
+
+#logo img {
+  width: 235px;
+  
+}
+
+#wrap {
+  border-top: 4px solid  #3b4729 !important;
+}
+Body {
+ font-family:Agency FB !important;
+}
+
+#main-menu ul li{
+  background:#7faf37;
+}
+#main-menu ul li a {
+  background: none !important;
+}
+
+
+#main-menu ul li a:hover{
+ background:#3b4729 !important;
+}
+#main-menu ul li {
+ background:#7faf37 !important;
+}
+
+#main-menu .menu a {
+ color:white !important;
+}
+
+.front h1.page-title, #first-time {
+ display:none
+}
+.images1 img{
+ 
+  margin-top:10px;
+  width:250px;
+  height:380px;
+}

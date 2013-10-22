@@ -1,0 +1,20 @@
+.socialseek {
+  background: none repeat scroll 0 0 #FFFFFF;
+  border-radius: 8px 8px 8px 8px;
+  padding: 5px;
+}
+.socialseek a {
+  border-bottom: 1px solid #DDDDDD;
+  clear: both;
+  color: #125E81;
+  display: block;
+  height: 22px;
+  margin-top: 6px;
+}
+.socialseek a:hover {
+  color: #1253fc;
+  text-decoration:none;
+}
+.socialseek a img {
+  margin-right:7px;
+}

@@ -1,0 +1,490 @@
+<?php
+/**
+* @file
+* Social Seek gather social-networking fans, followers, and share counts and list them in one place.
+*/
+
+/**
+ * Implements hook_block_info().
+ * Provides one block named 'Social Seek' that is globally cached.
+ */
+function social_seek_block_info() {
+  $block = array();
+  $blocks['social_seek_block'] = array(
+    'info' => t('Social Seek'),
+    'cache' => DRUPAL_CACHE_GLOBAL,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function social_seek_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'social_seek_block':
+      $block['subject'] = t('Social Seek');
+      $block['content'] = social_seek_fetch();
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure().
+ * Creates the form fields.
+ */
+function social_seek_block_configure($delta = '') {
+  global $theme;
+  $form = array();
+  if ($delta == 'social_seek_block') {
+    $form['social_seek_facebook_username']=array(
+      '#type' => 'textfield',
+      '#title' => t('Facebook Username'),
+      '#class' => 'draggable',
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_facebook_username', t('FriendsofDolphins'))
+    );
+    $form['social_seek_twitter_username']=array(
+      '#type' => 'textfield',
+      '#title' => t('Twitter Username'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_twitter_username', t('joomla'))
+    );
+    $form['social_seek_google_page_id']=array(
+      '#type' => 'textfield',
+      '#title' => t('Enter Google Page ID'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_google_page_id', '116782282193551332895')
+    );
+    $form['social_seek_google_api_key']=array(
+      '#type' => 'textfield',
+      '#title' => t('Enter Google Api Key'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_google_api_key', 'AIzaSyA3AiGrDXzLbBxdWt7w6V91XJOEvPJx-z4')
+    );    
+    $form['social_seek_youtube_username']=array(
+      '#type' => 'textfield',
+      '#title' => t('Youtube Username'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_youtube_username', t('sonybmg'))
+    );
+    $form['social_seek_vimeo_username']=array(
+      '#type' => 'textfield',
+      '#title' => t('Vimeo Username'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_vimeo_username', t('Robert'))
+    );
+    $form['social_seek_feedburner_username']=array(
+      '#type' => 'textfield',
+      '#title' => t('Feedburner Username Or Id'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_feedburner_username', t('usabilitygeek'))
+    );
+    $form['social_seek_dribbble_username']=array(
+      '#type' => 'textfield',
+      '#title' => t('Dribbble Username'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_dribbble_username', t('anatolinicolae'))
+    );
+    $form['social_seek_delicious_url']=array(
+      '#type' => 'textfield',
+      '#title' => t('Enter website full url for delicious'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_delicious_url', t('http://www.apple.com'))
+    );
+    $form['social_seek_linkedin_url']=array(
+      '#type' => 'textfield',
+      '#title' => t('Enter website full url for linkedin'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('social_seek_linkedin_url', t('http://www.apple.com'))
+    );
+    $form['social_seek_preset']=array(
+      '#type' => 'select',
+      '#title' => t('Select Theme Preset'),
+      '#options' => drupal_map_assoc(array('preset1', 'preset2', 'preset3')),
+      '#default_value' => variable_get('social_seek_preset', 1)
+    );
+   }
+   return $form; 
+}
+
+/**
+ * Implements hook_block_save().
+ * Stores Social seek values.
+ */
+function social_seek_block_save($delta = '', $edit = array()) {  
+  variable_set('social_seek_facebook_username', $edit['social_seek_facebook_username']);
+  variable_set('social_seek_twitter_username', $edit['social_seek_twitter_username']);
+  variable_set('social_seek_google_page_id', $edit['social_seek_google_page_id']);
+  variable_set('social_seek_google_api_key', $edit['social_seek_google_api_key']);  
+  variable_set('social_seek_youtube_username', $edit['social_seek_youtube_username']);
+  variable_set('social_seek_vimeo_username', $edit['social_seek_vimeo_username']);
+  variable_set('social_seek_feedburner_username', $edit['social_seek_feedburner_username']);
+  variable_set('social_seek_dribbble_username', $edit['social_seek_dribbble_username']);
+  variable_set('social_seek_delicious_url', $edit['social_seek_delicious_url']);
+  variable_set('social_seek_linkedin_url', $edit['social_seek_linkedin_url']);
+  variable_set('social_seek_preset', $edit['social_seek_preset']); 
+}
+
+
+function social_seek_fetch() {
+  $get_style = variable_get('social_seek_preset', 1);
+  switch ($get_style) {
+    case 'preset1':
+      return preset1();
+      break;
+    case 'preset2':
+      return preset2();
+      break;
+    case 'preset3':
+      return preset3();
+      break;
+  }
+}
+
+/**
+ * Renders display of block view.
+ */
+function preset1() {
+  $img_dir = drupal_get_path('module', 'social_seek') . "/images/preset1/";
+  $options = array('attributes' => array('target' => '_blank'), 'html' => TRUE);  
+  //Facebook
+  $facebook_page_id = variable_get('social_seek_facebook_username', 1);
+  $output = "<div class='socialseek'>" ;
+  if ($facebook_page_id) {
+    $location = "http://graph.facebook.com/$facebook_page_id" ;
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $facebook_data = drupal_json_decode($result->data);
+      $output .= l('<img src="' . $img_dir . 'facebook.png">' . t($facebook_data['likes'] . ' Fans'), 'http://facebook.com/' . $facebook_page_id, $options); 
+    }
+  }
+  //Twitter
+  $twitter_username = variable_get('social_seek_twitter_username', 1);
+  if ($twitter_username) {
+    $location = "http://twitter.com/users/show/$twitter_username";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $twitter_data = new SimpleXMLElement($result->data);
+      $output .= l('<img src="' . $img_dir . 'twitter.png">' . t($twitter_data->followers_count . ' Followers'), 'http://twitter.com/' . $twitter_username, $options); 
+    }
+  }
+  //Google 
+  $google_page_id = variable_get('social_seek_google_page_id', 1);
+  $google_api_key = variable_get('social_seek_google_api_key', 1);
+  if ($google_page_id && $google_api_key) {
+    $location = 'https://www.googleapis.com/plus/v1/people/' . $google_page_id . '?key=' . $google_api_key;
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $google_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'google.png">' . t($google_data['plusOneCount'] . ' Google Page Circle'), $google_data['url'], $options); 
+    }
+  }  
+  //Youtube
+  $youtube_username = variable_get('social_seek_youtube_username', 1);
+  if ($youtube_username) {
+    $location = "http://gdata.youtube.com/feeds/api/users/$youtube_username?alt=json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $youtube_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'youtube.png">' . t($youtube_data['entry']['yt$statistics']['subscriberCount'] . ' Subcribers'), 'http://youtube.com/user/' . $youtube_username, $options); 
+    }
+  }
+  //Vimeo
+  $vimeo_name = variable_get('social_seek_vimeo_username', 1);
+  if ($vimeo_name) {
+    $location = "http://vimeo.com/api/v2/$vimeo_name/videos.json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $vimeo_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'vimeo.png">' . t($vimeo_data[0]['stats_number_of_likes'] . ' Subcribers'), 'http://vimeo.com/' . $vimeo_name, $options); 
+    }
+  }
+  //Feedburners https://developers.google.com/feedburner/
+  $feedburner_username = variable_get('social_seek_feedburner_username', 1);
+  if ($feedburner_username) {
+    $location = "http://feedburner.google.com/api/awareness/1.0/GetFeedData?uri=$feedburner_username";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $feedburner_data = new SimpleXmlElement($result->data);
+      $output .= l('<img src="' . $img_dir . 'feedburner.png">' . t($feedburner_data->feed->entry['circulation'] . ' Subcribers'), 'http://feeds.feedburner.com/' . $feedburner_username, $options); 
+    }
+  }
+  //Dribbble
+  $dribbble_page_id = variable_get('social_seek_dribbble_username', 1);
+  if ($dribbble_page_id) {
+    $location = "http://api.dribbble.com/$dribbble_page_id";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $dribbble_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'dribbble.png">' . t($dribbble_data['followers_count'] . ' Followers'), 'http://dribbble.com/' . $dribbble_page_id, $options); 
+    }
+  }
+  //Delicious
+  $url = variable_get('social_seek_delicious_url', 1);
+  if ($url) {
+    $location = "http://feeds.delicious.com/v2/json/urlinfo/data?url=$url";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $delicious_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'delicious.png">' . t($delicious_data[0]['total_posts'] . ' Subcribers'), $url, $options); 
+    }
+  }
+  //linkedin
+  $url = variable_get('social_seek_linkedin_url', 1);
+  if ($url) {
+    $location = "http://www.linkedin.com/countserv/count/share?url=$url&format=json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $likedin_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'linkedin.png">' . t($likedin_data['count'] . ' ShareCount'), $url, $options); 
+    }
+  }
+  $output .= "</div>";
+  return $output;
+}
+
+
+/**
+ * Preset 2
+ */
+/**
+ * Renders display of block view.
+ */
+function link_options($social_networks) {
+  $options = array('attributes' => array('class' => $social_networks, 'target' => '_blank'), 'html' => TRUE);
+  return $options;
+}
+
+function preset2() {
+  $img_dir = drupal_get_path('module', 'social_seek') . "/images/preset2/";
+  //Facebook
+  $facebook_page_id = variable_get('social_seek_facebook_username', 1);
+  $output = "<div class='vertical'>" ;
+  if ($facebook_page_id) {
+    $social_networks = 'facebook';
+    $location = "http://graph.facebook.com/$facebook_page_id" ;
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $facebook_data = drupal_json_decode($result->data);
+      $output .= l('<img src="' . $img_dir . 'facebook.png"><span>Fans</span>' . t($facebook_data['likes']), 'http://facebook.com/' . $facebook_page_id, link_options('facebook')); 
+    }
+  }
+  //Twitter
+  $twitter_username = variable_get('social_seek_twitter_username', 1);
+  if ($twitter_username) {
+    $location = "http://twitter.com/users/show/$twitter_username";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $twitter_data = new SimpleXMLElement($result->data);
+      $output .= l('<img src="' . $img_dir . 'twitter.png"><span>Followers</span>' . t($twitter_data->followers_count), 'http://twitter.com/' . $twitter_username, link_options('twitter')); 
+    }
+  }
+  //Google 
+  $google_page_id = variable_get('social_seek_google_page_id', 1);
+  $google_api_key = variable_get('social_seek_google_api_key', 1);
+  if ($google_page_id && $google_api_key) {
+    $location = 'https://www.googleapis.com/plus/v1/people/' . $google_page_id . '?key=' . $google_api_key;
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $google_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'google.png"><span>In Circle</span>' . t($google_data['plusOneCount']), $google_data['url'], link_options('googleplus1')); 
+    }
+  }  
+  //Youtube
+  $youtube_username = variable_get('social_seek_youtube_username', 1);
+  if ($youtube_username) {
+    $location = "http://gdata.youtube.com/feeds/api/users/$youtube_username?alt=json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $youtube_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'youtube.png"><span>Subcribers</span>' . t($youtube_data['entry']['yt$statistics']['subscriberCount']), 'http://youtube.com/user/' . $youtube_username, link_options('youtube')); 
+    }
+  }
+  //Vimeo
+  $vimeo_name = variable_get('social_seek_vimeo_username', 1);
+  if ($vimeo_name) {
+    $location = "http://vimeo.com/api/v2/$vimeo_name/videos.json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $vimeo_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'vimeo.png"><span>Subcribers</span>' . t($vimeo_data[0]['stats_number_of_likes']), 'http://vimeo.com/' . $vimeo_name, link_options('vimeo')); 
+    }
+  }
+  //Feedburners https://developers.google.com/feedburner/
+  $feedburner_username = variable_get('social_seek_feedburner_username', 1);
+  if ($feedburner_username) {
+    $location = "http://feedburner.google.com/api/awareness/1.0/GetFeedData?uri=$feedburner_username";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $feedburner_data = new SimpleXmlElement($result->data);
+      $output .= l('<img src="' . $img_dir . 'feedburner.png"><span>Subcribers</span>' . t($feedburner_data->feed->entry['circulation']), 'http://feeds.feedburner.com/' . $feedburner_username, link_options('feedburner')); 
+    }
+  }
+  //Dribbble
+  $dribbble_page_id = variable_get('social_seek_dribbble_username', 1);
+  if ($dribbble_page_id) {
+    $location = "http://api.dribbble.com/$dribbble_page_id";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $dribbble_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'dribbble.png"><span>Followers</span>' . t($dribbble_data['followers_count']), 'http://dribbble.com/' . $dribbble_page_id, link_options('dribbble')); 
+    }
+  }
+  //Delicious
+  $url = variable_get('social_seek_delicious_url', 1);
+  if ($url) {
+    $location = "http://feeds.delicious.com/v2/json/urlinfo/data?url=$url";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $delicious_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'delicious.png"><span>Subcribers</span>' . t($delicious_data[0]['total_posts']), $url, link_options('delicious')); 
+    }
+  }
+  //linkedin
+  $url = variable_get('social_seek_linkedin_url', 1);
+  if ($url) {
+    $location = "http://www.linkedin.com/countserv/count/share?url=$url&format=json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $likedin_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'linkedin.png"><span>Share Count</span>' . t($likedin_data['count']), $url, link_options('linkedin')); 
+    }
+  }
+  $output .= "</div>";
+  return $output;
+}
+
+
+/**
+ * Preset 3
+ */
+/**
+ * Renders display of block view.
+ */
+function preset3() {
+  $img_dir = drupal_get_path('module', 'social_seek') . "/images/preset3/"; 
+  $options = array('attributes' => array('target' => '_blank'), 'html' => TRUE);  
+  //Facebook
+  $facebook_page_id = variable_get('social_seek_facebook_username', 1);
+  $output = "<div class='vertical'>" ;
+  if ($facebook_page_id) {
+    $location = "http://graph.facebook.com/$facebook_page_id" ;
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $facebook_data = drupal_json_decode($result->data);
+      $output .= l('<img src="' . $img_dir . 'facebook.png">' . t($facebook_data['likes'] . ' Fans <span>Like us on Facebook</span>'), 'http://facebook.com/' . $facebook_page_id, link_options('facebook')); 
+    }
+  }
+  //Twitter
+  $twitter_username = variable_get('social_seek_twitter_username', 1);
+  if ($twitter_username) {
+    $location = "http://twitter.com/users/show/$twitter_username";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $twitter_data = new SimpleXMLElement($result->data);
+      $output .= l('<img src="' . $img_dir . 'twitter.png">' . t($twitter_data->followers_count . ' Followers <span>Follow us on Twitter</span>'), 'http://twitter.com/' . $twitter_username, link_options('twitter')); 
+    }
+  }
+  //Google 
+  $google_page_id = variable_get('social_seek_google_page_id', 1);
+  $google_api_key = variable_get('social_seek_google_api_key', 1);
+  if ($google_page_id && $google_api_key) {
+    $location = 'https://www.googleapis.com/plus/v1/people/' . $google_page_id . '?key=' . $google_api_key;
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $google_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'google.png">' . t($google_data['plusOneCount'] . ' Google Circle <span>Add us on Google+</span>'), $google_data['url'], link_options('googleplus1')); 
+    }
+  }  
+  //Youtube
+  $youtube_username = variable_get('social_seek_youtube_username', 1);
+  if ($youtube_username) {
+    $location = "http://gdata.youtube.com/feeds/api/users/$youtube_username?alt=json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $youtube_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'youtube.png">' . t($youtube_data['entry']['yt$statistics']['subscriberCount'] . ' Subcribers <span>Watch us on Youtube</span>'), 'http://youtube.com/user/' . $youtube_username, link_options('youtube')); 
+    }
+  }
+  //Vimeo
+  $vimeo_name = variable_get('social_seek_vimeo_username', 1);
+  if ($vimeo_name) {
+    $location = "http://vimeo.com/api/v2/$vimeo_name/videos.json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $vimeo_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'vimeo.png">' . t($vimeo_data[0]['stats_number_of_likes'] . ' Subcribers <span>See us on Vimeo</span>'), 'http://vimeo.com/' . $vimeo_name, link_options('vimeo')); 
+    }
+  }
+  //Feedburners https://developers.google.com/feedburner/
+  $feedburner_username = variable_get('social_seek_feedburner_username', 1);
+  if ($feedburner_username) {
+    $location = "http://feedburner.google.com/api/awareness/1.0/GetFeedData?uri=$feedburner_username";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $feedburner_data = new SimpleXmlElement($result->data);
+      $output .= l('<img src="' . $img_dir . 'feedburner.png">' . t($feedburner_data->feed->entry['circulation'] . ' Subcribers <span>Read on Feeedburner</span>'), 'http://feeds.feedburner.com/' . $feedburner_username, link_options('feedburner')); 
+    }
+  }
+  //Dribbble
+  $dribbble_page_id = variable_get('social_seek_dribbble_username', 1);
+  if ($dribbble_page_id) {
+    $location = "http://api.dribbble.com/$dribbble_page_id";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $dribbble_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'dribbble.png">' . t($dribbble_data['followers_count'] . ' Followers <span>Follow us on Dribbble</sapn>'), 'http://dribbble.com/' . $dribbble_page_id, link_options('dribbble')); 
+    }
+  }
+  //Delicious
+  $delicious_url = variable_get('social_seek_delicious_url', 1);
+  if ($delicious_url) {
+    $location = "http://feeds.delicious.com/v2/json/urlinfo/data?url=$delicious_url";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $delicious_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'delicious.png">' . t($delicious_data[0]['total_posts'] . ' Subcribers <span>Bookmark on Delicious</span>'), $delicious_url, link_options('delicious')); 
+    }
+  }
+  //linkedin
+  $linkedin_url = variable_get('social_seek_linkedin_url', 1);
+  if ($linkedin_url) {
+    $location = "http://www.linkedin.com/countserv/count/share?url=$linkedin_url&format=json";
+    $result = drupal_http_request($location);
+    if ($result->code == 200) {
+      $likedin_data = drupal_json_decode($result->data, TRUE);
+      $output .= l('<img src="' . $img_dir . 'linkedin.png">' . t($likedin_data['count'] . ' ShareCount <span>Share us on Linkedin</span>'), $linkedin_url, link_options('linkedin')); 
+    }
+  }
+  $output .= "</div>";
+  return $output;
+}
+
+
+
+/**
+ * Implementation of hook_init().
+ */
+function social_seek_init() {
+  $get_style = variable_get('social_seek_preset', 1);
+  switch ($get_style) {
+    case 'preset1':
+      drupal_add_css(drupal_get_path('module', 'social_seek') . '/css/preset1.css');
+      break;
+    case 'preset2':
+      drupal_add_css(drupal_get_path('module', 'social_seek') . '/css/preset2.css');
+      break;
+    case 'preset3':
+      drupal_add_css(drupal_get_path('module', 'social_seek') . '/css/preset3.css');
+    break;
+  }
+}
+
+/**
+ * Implementation of hook_enable()
+ */
+function social_seek_enable() {
+  drupal_set_message(t(l('Configure Social Seek Block.', 'admin/structure/block/manage/social_seek/social_seek_block/configure')), 'status');
+}
